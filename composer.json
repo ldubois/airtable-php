@@ -13,7 +13,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Armetiz\\AirtableSDK\\": "src/"
+            "Airtable\\": "src/"
         }
     },
     "authors": [
