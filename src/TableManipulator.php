@@ -1,6 +1,6 @@
 <?php
 
-namespace Armetiz\AirtableSDK;
+namespace Airtable;
 
 class TableManipulator
 {

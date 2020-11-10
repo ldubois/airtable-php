@@ -61,7 +61,7 @@ $records = $airtable->findRecords($table);
 ```
 
 ```php
-use Armetiz\AirtableSDK\Airtable as AirtableClient;
+use Airtable\Airtable as AirtableClient;
 
 class MemberIndex
 {

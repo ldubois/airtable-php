@@ -1,6 +1,6 @@
 <?php
 
-namespace Armetiz\AirtableSDK;
+namespace Airtable;
 
 use Assert\Assertion;
 use Buzz;
