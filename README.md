@@ -1,13 +1,13 @@
 # Airtable for PHP
 
-Basic SDK to deal with airtable records.
+Basic SDK to deal with airtable records. Fork of armetiz/airtable-php
 
 ## Installation
 
 Tell composer to require this bundle by running:
 
 ``` bash
-composer require armetiz/airtable-php
+composer require ldubois/airtable-php
 ```
 
 ## Usage
