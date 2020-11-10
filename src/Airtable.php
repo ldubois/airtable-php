@@ -97,6 +97,8 @@ class Airtable
 
         Assertion::notNull($record, 'Record not found');
 
+        //$fields = $this->format($fields);
+
         /** @var Response $response */
         $response = $this->browser->patch(
             $this->getEndpoint($table, $record->getId()),
@@ -186,6 +188,24 @@ class Airtable
         return current($records);
     }
 
+    private function format($s){
+
+        if(is_array($s)){
+            $res = [];
+            foreach($s as $key=>$value){
+                    $res[$this->format($key)]=$this->format($value);
+            }
+
+            return $res;
+        }
+        
+        $s = str_replace(' ', '&nbsp;', $s);
+
+        return $s;
+        
+
+    }
+
     /**
      * TODO - Be able to loop over multiple pages. 
      * 
@@ -198,7 +218,7 @@ class Airtable
         if (count($criteria) > 0) {
             $formulas = [];
             foreach ($criteria as $field => $value) {
-                $field = str_replace(' ', '&nbsp;', $field);
+                $field = $this->format($field);
                 $formulas[] = sprintf("{%s}='%s'", $field, $value);
             }
 
