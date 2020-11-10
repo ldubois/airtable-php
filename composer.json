@@ -1,8 +1,9 @@
 {
-    "name": "armetiz/airtable-php",
+    "name": "ldubois/airtable-php",
+    "type": "library",
     "description": "Manipulate Airtable API using PHP",
     "keywords": ["php", "airtable", "sdk"],
-    "homepage": "https://github.com/armetiz/airtable-php",
+    "homepage": "https://github.com/ldubois/airtable-php",
     "require": {
         "ext-json": "*",
         "php": ">=7.1",
@@ -20,6 +21,9 @@
             "name": "Thomas Tourlourat",
             "email": "thomas@tourlourat.com",
             "homepage": "http://www.wozbe.com"
+        },
+        {
+            "name": "Ludovic DUBOIS",
         }
     ]
 }

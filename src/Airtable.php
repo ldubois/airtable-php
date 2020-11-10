@@ -198,7 +198,8 @@ class Airtable
         if (count($criteria) > 0) {
             $formulas = [];
             foreach ($criteria as $field => $value) {
-                $formulas[] = sprintf("%s='%s'", $field, $value);
+                $field = str_replace(' ', '&nbsp;', $field);
+                $formulas[] = sprintf("{%s}='%s'", $field, $value);
             }
 
             $url .= sprintf(
