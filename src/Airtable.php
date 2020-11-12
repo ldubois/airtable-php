@@ -5,6 +5,7 @@ namespace Airtable;
 use Assert\Assertion;
 use Buzz;
 use Buzz\Message\Response;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class Airtable
 {
@@ -85,15 +86,28 @@ class Airtable
      */
     public function updateRecord(string $table, array $criteria, array $fields): void
     {
-        $record = $this->findRecord($table, $criteria);
+        
+            $record = $this->findRecord($table, $criteria);
 
-        Assertion::notNull($record, 'Record not found');
+            Assertion::notNull($record, 'Record not found');
+        
 
-        //$fields = $this->format($fields);
+        $this->updateRecordById($table,$record->getId(),$fields);
+    }
+
+    /**
+     * This will update some (but not all) fields of a table record,
+     *  issuing a PATCH request to the record endpoint. 
+     *  Any fields that are not included will not be updated.
+     *
+     * @throws \Assert\AssertionFailedException
+     */
+    public function updateRecordById(string $table, string $id, array $fields): void
+    {
 
         /** @var Response $response */
         $response = $this->browser->patch(
-            $this->getEndpoint($table, $record->getId()),
+            $this->getEndpoint($table, $id),
             [
                 'content-type' => 'application/json',
             ],
@@ -188,7 +202,7 @@ class Airtable
             return $res;
         }
 
-        $s = str_replace(' ', '&nbsp;', $s);
+        $s = str_replace(' ', '%20', $s);
 
         return $s;
     }
@@ -231,6 +245,9 @@ class Airtable
                 }
                 $newUrl .= '&offset='.$offset;
             }
+
+            
+            debug($newUrl);
             /** @var Response $response */
             $response = $this->browser->get(
                 $newUrl,
@@ -243,6 +260,7 @@ class Airtable
 
             $offset = $data['offset']??null;
 
+            debug($data);
             $result = array_map(function (array $value) {
                 return new Record($value['id'], $value['fields']);
             }, $data['records']);

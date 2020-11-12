@@ -29,6 +29,11 @@ class TableManipulator
         $this->client->updateRecord($this->table, $criteria, $fields);
     }
 
+    public function updateRecordById(array $criteria, string $id,array $fields): void
+    {
+        $this->client->updateRecordById($this->table, $id, $fields);
+    }
+
     public function containsRecord(array $criteria = []): bool
     {
         return $this->client->containsRecord($this->table, $criteria);
