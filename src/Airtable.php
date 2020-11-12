@@ -56,10 +56,6 @@ class Airtable
     /**
      * This will update all fields of a table record, issuing a PUT request to the record endpoint. Any fields that are not included will be cleared ().
      *
-     * @param string $table
-     * @param array  $criteria
-     * @param array  $fields
-     *
      * @throws \Assert\AssertionFailedException
      */
     public function setRecord(string $table, array $criteria, array $fields): void
@@ -84,10 +80,6 @@ class Airtable
 
     /**
      * This will update some (but not all) fields of a table record, issuing a PATCH request to the record endpoint. Any fields that are not included will not be updated.
-     *
-     * @param string $table
-     * @param array  $criteria
-     * @param array  $fields
      *
      * @throws \Assert\AssertionFailedException
      */
@@ -115,7 +107,7 @@ class Airtable
 
     public function containsRecord(string $table, array $criteria): bool
     {
-        return $this->findRecord($table, $criteria) !== null;
+        return null !== $this->findRecord($table, $criteria);
     }
 
     public function flushRecords(string $table): void
@@ -175,43 +167,38 @@ class Airtable
         $records = $this->findRecords($table, $criteria);
 
         if (count($records) > 1) {
-            throw new \RuntimeException(sprintf(
-                "More than one records have been found from '%s:%s'.",
-                $this->base, $table
-            ));
+            throw new \RuntimeException(sprintf("More than one records have been found from '%s:%s'.", $this->base, $table));
         }
 
-        if (count($records) === 0) {
+        if (0 === count($records)) {
             return null;
         }
 
         return current($records);
     }
 
-    private function format($s){
-
-        if(is_array($s)){
+    private function format($s)
+    {
+        if (is_array($s)) {
             $res = [];
-            foreach($s as $key=>$value){
-                    $res[$this->format($key)]=$this->format($value);
+            foreach ($s as $key => $value) {
+                $res[$this->format($key)] = $this->format($value);
             }
 
             return $res;
         }
-        
+
         $s = str_replace(' ', '&nbsp;', $s);
 
         return $s;
-        
-
     }
 
     /**
-     * TODO - Be able to loop over multiple pages. 
-     * 
+     * TODO - Be able to loop over multiple pages.
+     *
      * @return Record[]
      */
-    public function findRecords(string $table, array $criteria): array
+    public function findRecords(string $table, array $criteria = []): array
     {
         $url = $this->getEndpoint($table);
 
@@ -228,19 +215,43 @@ class Airtable
             );
         }
 
-        /** @var Response $response */
-        $response = $this->browser->get(
-            $url,
-            [
-                'content-type' => 'application/json',
-            ]
-        );
+        $offset = null;
+        $start = true;
+        $res = [];
+        while ($start || $offset != null) {
+            $start = false;
+            $newUrl = $url;
+            if(!empty($offset)){
+                if (count($criteria) > 0) {
+                   
+                $newUrl .= '&';
+                }
+                else{
+                    $newUrl .= '?';
+                }
+                $newUrl .= '&offset='.$offset;
+            }
+            /** @var Response $response */
+            $response = $this->browser->get(
+                $newUrl,
+                [
+                    'content-type' => 'application/json',
+                ]
+            );
+            $data = json_decode($response->getContent(), true);
 
-        $data = json_decode($response->getContent(), true);
 
-        return array_map(function (array $value) {
-            return new Record($value['id'], $value['fields']);
-        }, $data['records']);
+            $offset = $data['offset']??null;
+
+            $result = array_map(function (array $value) {
+                return new Record($value['id'], $value['fields']);
+            }, $data['records']);
+
+            $res = array_merge($res, $result);
+
+        }
+
+        return $res;
     }
 
     protected function getEndpoint(string $table, ?string $id = null): string
@@ -249,16 +260,16 @@ class Airtable
             $urlPattern = 'https://api.airtable.com/v0/%BASE%/%TABLE%/%ID%';
 
             return strtr($urlPattern, [
-                '%BASE%'  => $this->base,
+                '%BASE%' => $this->base,
                 '%TABLE%' => rawurlencode($table),
-                '%ID%'    => $id,
+                '%ID%' => $id,
             ]);
         }
 
         $urlPattern = 'https://api.airtable.com/v0/%BASE%/%TABLE%';
 
         return strtr($urlPattern, [
-            '%BASE%'  => $this->base,
+            '%BASE%' => $this->base,
             '%TABLE%' => rawurlencode($table),
         ]);
     }
@@ -266,26 +277,14 @@ class Airtable
     protected function guardResponse(string $table, Response $response): void
     {
         if (429 === $response->getStatusCode()) {
-            throw new \RuntimeException(sprintf(
-                    'Rate limit reach on "%s:%s".',
-                    $this->base,
-                    $table
-                )
-            );
+            throw new \RuntimeException(sprintf('Rate limit reach on "%s:%s".', $this->base, $table));
         }
 
         if (200 !== $response->getStatusCode()) {
             $content = json_decode($response->getContent(), true);
             $message = $content['error']['message'] ?? 'No details';
 
-            throw new \RuntimeException(sprintf(
-                    'An "%s" error occurred when trying to create record on "%s:%s" : %s',
-                    $response->getStatusCode(),
-                    $this->base,
-                    $table,
-                    $message
-                )
-            );
+            throw new \RuntimeException(sprintf('An "%s" error occurred when trying to create record on "%s:%s" : %s', $response->getStatusCode(), $this->base, $table, $message));
         }
     }
 }
