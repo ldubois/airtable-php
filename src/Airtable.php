@@ -86,13 +86,13 @@ class Airtable
      */
     public function updateRecord(string $table, array $criteria, array $fields): void
     {
-        
-            $record = $this->findRecord($table, $criteria);
 
-            Assertion::notNull($record, 'Record not found');
-        
+        $record = $this->findRecord($table, $criteria);
 
-        $this->updateRecordById($table,$record->getId(),$fields);
+        Assertion::notNull($record, 'Record not found');
+
+
+        $this->updateRecordById($table, $record->getId(), $fields);
     }
 
     /**
@@ -235,19 +235,17 @@ class Airtable
         while ($start || $offset != null) {
             $start = false;
             $newUrl = $url;
-            if(!empty($offset)){
+            if (!empty($offset)) {
                 if (count($criteria) > 0) {
-                   
-                $newUrl .= '&';
-                }
-                else{
+
+                    $newUrl .= '&';
+                } else {
                     $newUrl .= '?';
                 }
-                $newUrl .= '&offset='.$offset;
+                $newUrl .= '&offset=' . $offset;
             }
 
-            
-            debug($newUrl);
+
             /** @var Response $response */
             $response = $this->browser->get(
                 $newUrl,
@@ -258,15 +256,13 @@ class Airtable
             $data = json_decode($response->getContent(), true);
 
 
-            $offset = $data['offset']??null;
+            $offset = $data['offset'] ?? null;
 
-            debug($data);
             $result = array_map(function (array $value) {
                 return new Record($value['id'], $value['fields']);
             }, $data['records']);
 
             $res = array_merge($res, $result);
-
         }
 
         return $res;
