@@ -62,7 +62,7 @@ $records = $airtable->findRecords($table);
 ```
 
 ```php
-use Airtable\Airtable as AirtableClient;
+use Ldubois\AirtableSDK\Airtable as AirtableClient;
 
 class MemberIndex
 {
