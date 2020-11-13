@@ -1,6 +1,6 @@
 <?php
 
-namespace Airtable;
+namespace Ldubois\AirtableSDK;
 
 use Assert\Assertion;
 use Buzz;
