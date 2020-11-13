@@ -1,9 +1,9 @@
 {
-    "name": "ldubois/airtable-php",
+    "name": "ldubois/php-airtable",
     "type": "library",
     "description": "Manipulate Airtable API using PHP",
     "keywords": ["php", "airtable", "sdk","api"],
-    "homepage": "https://github.com/ldubois/airtable-php",
+    "homepage": "https://github.com/ldubois/php-airtable",
     "require": {
         "ext-json": "*",
         "php": ">=7.1",
