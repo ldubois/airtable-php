@@ -1,13 +1,13 @@
 # Airtable for PHP
 
-Basic SDK to deal with airtable records. Fork of armetiz/airtable-php
+Basic SDK to deal with airtable records. Fork on armetiz/airtable-php
 
 ## Installation
 
 Tell composer to require this bundle by running:
 
 ``` bash
-composer require ldubois/airtable-php
+composer require ldubois/php-airtable
 ```
 
 ## Usage
@@ -29,6 +29,7 @@ $records = $airtable->findRecords($table);
 * Airtable::createRecord(string $table, array $fields)
 * Airtable::setRecord(string $table, array $criteria = [], array $fields)
 * Airtable::updateRecord(string $table, array $criteria = [], array $fields)
+* Airtable::updateRecordById(string $table, string $id, array $fields)
 * Airtable::containsRecord(string $table, array $criteria = [])
 * Airtable::flushRecords(string $table)
 * Airtable::deleteRecord(string $table, array $criteria = [])
@@ -108,7 +109,7 @@ Not implemented yet.
 
 ## License
 
-This library is under the MIT license. [See the complete license](https://github.com/armetiz/airtable-php/blob/master/LICENSE).
+Fork : This library is under the MIT license. [See the complete license](https://github.com/armetiz/airtable-php/blob/master/LICENSE).
 
 ## Credits
 
