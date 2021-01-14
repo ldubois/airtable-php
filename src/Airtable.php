@@ -10,7 +10,7 @@ use phpDocumentor\Reflection\Types\Boolean;
 class Airtable
 {
     /** @var Buzz\Browser */
-    private $browser;
+    protected $browser;
 
     /** @var string */
     private $base;
@@ -86,7 +86,6 @@ class Airtable
      */
     public function updateRecord(string $table, array $criteria, array $fields): void
     {
-
         $record = $this->findRecord($table, $criteria);
 
         Assertion::notNull($record, 'Record not found');
@@ -97,7 +96,7 @@ class Airtable
 
     /**
      * This will update some (but not all) fields of a table record,
-     *  issuing a PATCH request to the record endpoint. 
+     *  issuing a PATCH request to the record endpoint.
      *  Any fields that are not included will not be updated.
      *
      * @throws \Assert\AssertionFailedException
@@ -191,7 +190,7 @@ class Airtable
         return current($records);
     }
 
-    private function format($s)
+    protected function format($s)
     {
         if (is_array($s)) {
             $res = [];
@@ -237,7 +236,6 @@ class Airtable
             $newUrl = $url;
             if (!empty($offset)) {
                 if (count($criteria) > 0) {
-
                     $newUrl .= '&';
                 } else {
                     $newUrl .= '?';
