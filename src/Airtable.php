@@ -158,6 +158,24 @@ class Airtable
         $this->guardResponse($table, $response);
     }
 
+    public function deleteRecords(string $table, array $criteria): void
+    {
+        $records = $this->findRecords($table, $criteria);
+        foreach ($records as $record) {
+            Assertion::notNull($record, 'Record not found');
+
+            /** @var Response $response */
+            $response = $this->browser->delete(
+                $this->getEndpoint($table, $record->getId()),
+                [
+                'content-type' => 'application/json',
+            ]
+            );
+
+            $this->guardResponse($table, $response);
+        }
+    }
+
     public function getRecord(string $table, string $id): Record
     {
         $url = $this->getEndpoint($table, $id);
