@@ -4,6 +4,7 @@ namespace Ldubois\AirtableSDK;
 
 use Assert\Assertion;
 use Buzz;
+use Buzz\Client\AbstractClient;
 use Buzz\Message\Response;
 use phpDocumentor\Reflection\Types\Boolean;
 
@@ -15,7 +16,7 @@ class Airtable
     /** @var string */
     private $base;
 
-    public function __construct(string $accessToken, string $base)
+    public function __construct(string $accessToken, string $base, int $timeout = 10)
     {
         // @see https://github.com/kriswallsmith/Buzz/pull/186
         $listener = new Buzz\Listener\CallbackListener(function (Buzz\Message\RequestInterface $request, $response = null) use ($accessToken) {
@@ -29,6 +30,11 @@ class Airtable
 
         $this->browser = new Buzz\Browser(new Buzz\Client\Curl());
         $this->browser->addListener($listener);
+
+        
+        /** @var AbstractClient */
+        $client = $this->browser->getClient();
+        $client->setTimeout($timeout);
 
         $this->base = $base;
     }
