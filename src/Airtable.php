@@ -196,6 +196,10 @@ class Airtable
 
         $data = json_decode($response->getContent(), true);
 
+        if (empty($data['id']) || empty($data['fields'])) {
+            throw new \RuntimeException(sprintf("No records have been found from '%s:%s:%s'.", $this->base, $table, $id));
+        }
+
         return new Record($data['id'], $data['fields']);
     }
 
