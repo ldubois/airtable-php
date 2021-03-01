@@ -323,4 +323,25 @@ class Airtable
             throw new \RuntimeException(sprintf('An "%s" error occurred when trying to create record on "%s:%s" : %s', $response->getStatusCode(), $this->base, $table, $message));
         }
     }
+
+    public function getBase()
+    {
+        $urlPattern = 'https://api.airtable.com/v0/meta/bases/%BASE%?include=collaborators&include=inviteLinks';
+
+        $url = strtr($urlPattern, [
+            '%BASE%' => $this->base,
+        ]);
+
+        /** @var Response $response */
+        $response = $this->browser->get(
+            $url,
+            [
+                'content-type' => 'application/json',
+            ]
+        );
+
+        $data = json_decode($response->getContent(), true);
+
+        return $data;
+    }
 }
