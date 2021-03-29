@@ -24,6 +24,8 @@ $records = $airtable->findRecords($table);
 
 **Available methods**
 
+
+* Airtable::getBase()
 * Airtable::createTableManipulator(string $table): TableManipulator
 * Airtable::getRecord(string $table, string $id)
 * Airtable::createRecord(string $table, array $fields)
@@ -33,8 +35,10 @@ $records = $airtable->findRecords($table);
 * Airtable::containsRecord(string $table, array $criteria = [])
 * Airtable::flushRecords(string $table)
 * Airtable::deleteRecord(string $table, array $criteria = [])
+* Airtable::deleteRecords(string $table, array $criteria = [])
 * Airtable::findRecord(string $table, array $criteria = [])
 * Airtable::findRecords(string $table, array $criteria = [])
+* Airtable::containsRecord(string $table, array $criteria = [])
 
 ## Example
 
@@ -103,14 +107,8 @@ class MemberIndex
 }
 ```
 
-## Testing
-
-Not implemented yet.
 
 ## License
 
-Fork : This library is under the MIT license. [See the complete license](https://github.com/armetiz/airtable-php/blob/master/LICENSE).
+Fork : This library is under the MIT license. [See the complete license](https://github.com/ldubois/airtable-php/blob/master/LICENSE).
 
-## Credits
-
-Author - [Thomas Tourlourat](http://www.wozbe.com)

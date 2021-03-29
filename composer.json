@@ -18,12 +18,12 @@
     },
     "authors": [
         {
+            "name": "Ludovic DUBOIS"
+        },
+        {
             "name": "Thomas Tourlourat",
             "email": "thomas@tourlourat.com",
             "homepage": "http://www.wozbe.com"
-        },
-        {
-            "name": "Ludovic DUBOIS"
         }
     ]
 }
