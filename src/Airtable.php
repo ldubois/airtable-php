@@ -281,7 +281,9 @@ class Airtable
             );
             $data = json_decode($response->getContent(), true);
 
-
+            if(empty($data['records'])){
+                return [];
+            }
             $offset = $data['offset'] ?? null;
 
             $result = array_map(function (array $value) {
