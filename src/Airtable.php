@@ -90,14 +90,14 @@ class Airtable
      *
      * @throws \Assert\AssertionFailedException
      */
-    public function updateRecord(string $table, array $criteria, array $fields): void
+    public function updateRecord(string $table, array $criteria, array $fields): array
     {
         $record = $this->findRecord($table, $criteria);
 
         Assertion::notNull($record, 'Record not found');
 
 
-        $this->updateRecordById($table, $record->getId(), $fields);
+        return $this->updateRecordById($table, $record->getId(), $fields);
     }
 
     /**

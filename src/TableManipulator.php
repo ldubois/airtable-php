@@ -14,24 +14,24 @@ class TableManipulator
     }
 
 
-    public function createRecord(array $fields): void
+    public function createRecord(array $fields): array
     {
-        $this->client->createRecord($this->table, $fields);
+        return $this->client->createRecord($this->table, $fields);
     }
 
-    public function setRecord(array $criteria, array $fields): void
+    public function setRecord(array $criteria, array $fields): array
     {
-        $this->client->setRecord($this->table, $criteria, $fields);
+        return $this->client->setRecord($this->table, $criteria, $fields);
     }
 
-    public function updateRecord(array $criteria, array $fields): void
+    public function updateRecord(array $criteria, array $fields): array
     {
-        $this->client->updateRecord($this->table, $criteria, $fields);
+        return $this->client->updateRecord($this->table, $criteria, $fields);
     }
 
-    public function updateRecordById(string $id,array $fields): void
+    public function updateRecordById(string $id,array $fields): array
     {
-        $this->client->updateRecordById($this->table, $id, $fields);
+        return $this->client->updateRecordById($this->table, $id, $fields);
     }
 
     public function containsRecord(array $criteria = []): bool
@@ -44,9 +44,9 @@ class TableManipulator
         $this->client->flushRecords($this->table);
     }
 
-    public function deleteRecord(array $criteria = []): void
+    public function deleteRecord(array $criteria = []): array
     {
-        $this->client->deleteRecord($this->table, $criteria);
+        return $this->client->deleteRecord($this->table, $criteria);
     }
 
     public function getRecord(string $id): Record
