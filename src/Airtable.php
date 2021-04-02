@@ -44,7 +44,7 @@ class Airtable
         return new TableManipulator($this, $table);
     }
 
-    public function createRecord(string $table, array $fields): void
+    public function createRecord(string $table, array $fields): array
     {
         /** @var Response $response */
         $response = $this->browser->post(
@@ -57,7 +57,7 @@ class Airtable
             ])
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     /**
@@ -65,7 +65,7 @@ class Airtable
      *
      * @throws \Assert\AssertionFailedException
      */
-    public function setRecord(string $table, array $criteria, array $fields): void
+    public function setRecord(string $table, array $criteria, array $fields): array
     {
         $record = $this->findRecord($table, $criteria);
 
@@ -82,7 +82,7 @@ class Airtable
             ])
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     /**
@@ -107,7 +107,7 @@ class Airtable
      *
      * @throws \Assert\AssertionFailedException
      */
-    public function updateRecordById(string $table, string $id, array $fields): void
+    public function updateRecordById(string $table, string $id, array $fields): array
     {
 
         /** @var Response $response */
@@ -121,7 +121,7 @@ class Airtable
             ])
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     public function containsRecord(string $table, array $criteria): bool
@@ -147,7 +147,7 @@ class Airtable
         }
     }
 
-    public function deleteRecord(string $table, array $criteria): void
+    public function deleteRecord(string $table, array $criteria): array
     {
         $record = $this->findRecord($table, $criteria);
 
@@ -161,7 +161,7 @@ class Airtable
             ]
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     public function deleteRecords(string $table, array $criteria): void
@@ -316,7 +316,7 @@ class Airtable
         ]);
     }
 
-    protected function guardResponse(string $table, Response $response): void
+    protected function guardResponse(string $table, Response $response): array
     {
         if (429 === $response->getStatusCode()) {
             throw new \RuntimeException(sprintf('Rate limit reach on "%s:%s".', $this->base, $table));
@@ -328,6 +328,16 @@ class Airtable
 
             throw new \RuntimeException(sprintf('An "%s" error occurred when trying to create record on "%s:%s" : %s', $response->getStatusCode(), $this->base, $table, $message));
         }
+
+
+        if (empty($response->getContent())) {
+
+            return [];
+        }
+
+        $content = json_decode($response->getContent(), true);
+
+        return $content;
     }
 
     public function getBase()
