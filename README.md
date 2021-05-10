@@ -39,6 +39,7 @@ $records = $airtable->findRecords($table);
 * Airtable::findRecord(string $table, array $criteria = [])
 * Airtable::findRecords(string $table, array $criteria = [])
 * Airtable::containsRecord(string $table, array $criteria = [])
+* Airtable::searchRecords(string $table, array $fields, string $search, string $criteria = "", string $view = "", int $maxRows = 5)
 
 ## Example
 
@@ -80,6 +81,11 @@ class MemberIndex
     public function clear()
     {
         $this->airtable->flushRecords();
+    }
+
+    public function search(){
+        $records  =  $this->airtable->searchRecords( ["Champ1","Champ2"], "search_value");
+        return $records;
     }
 
     public function save(array $data)
