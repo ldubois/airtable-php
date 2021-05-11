@@ -31,7 +31,7 @@ class Airtable
         $this->browser = new Buzz\Browser(new Buzz\Client\Curl());
         $this->browser->addListener($listener);
 
-
+        
         /** @var AbstractClient */
         $client = $this->browser->getClient();
         $client->setTimeout($timeout);
@@ -44,7 +44,7 @@ class Airtable
         return new TableManipulator($this, $table);
     }
 
-    public function createRecord(string $table, array $fields): void
+    public function createRecord(string $table, array $fields): array
     {
         /** @var Response $response */
         $response = $this->browser->post(
@@ -57,7 +57,7 @@ class Airtable
             ])
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     /**
@@ -65,7 +65,7 @@ class Airtable
      *
      * @throws \Assert\AssertionFailedException
      */
-    public function setRecord(string $table, array $criteria, array $fields): void
+    public function setRecord(string $table, array $criteria, array $fields): array
     {
         $record = $this->findRecord($table, $criteria);
 
@@ -82,7 +82,7 @@ class Airtable
             ])
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     /**
@@ -90,14 +90,14 @@ class Airtable
      *
      * @throws \Assert\AssertionFailedException
      */
-    public function updateRecord(string $table, array $criteria, array $fields): void
+    public function updateRecord(string $table, array $criteria, array $fields): array
     {
         $record = $this->findRecord($table, $criteria);
 
         Assertion::notNull($record, 'Record not found');
 
 
-        $this->updateRecordById($table, $record->getId(), $fields);
+        return $this->updateRecordById($table, $record->getId(), $fields);
     }
 
     /**
@@ -107,7 +107,7 @@ class Airtable
      *
      * @throws \Assert\AssertionFailedException
      */
-    public function updateRecordById(string $table, string $id, array $fields): void
+    public function updateRecordById(string $table, string $id, array $fields): array
     {
 
         /** @var Response $response */
@@ -121,7 +121,7 @@ class Airtable
             ])
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     public function containsRecord(string $table, array $criteria): bool
@@ -147,7 +147,7 @@ class Airtable
         }
     }
 
-    public function deleteRecord(string $table, array $criteria): void
+    public function deleteRecord(string $table, array $criteria): array
     {
         $record = $this->findRecord($table, $criteria);
 
@@ -161,7 +161,7 @@ class Airtable
             ]
         );
 
-        $this->guardResponse($table, $response);
+        return $this->guardResponse($table, $response);
     }
 
     public function deleteRecords(string $table, array $criteria): void
@@ -174,8 +174,8 @@ class Airtable
             $response = $this->browser->delete(
                 $this->getEndpoint($table, $record->getId()),
                 [
-                    'content-type' => 'application/json',
-                ]
+                'content-type' => 'application/json',
+            ]
             );
 
             $this->guardResponse($table, $response);
@@ -235,6 +235,133 @@ class Airtable
     }
 
     /**
+     * TODO - Be able to loop over multiple pages.
+     *
+     * @return Record[]
+     */
+    public function findRecords(string $table, array $criteria = []): array
+    {
+        $url = $this->getEndpoint($table);
+
+        if (count($criteria) > 0) {
+            $formulas = [];
+            foreach ($criteria as $field => $value) {
+                $field = $this->format($field);
+                $formulas[] = sprintf("{%s}='%s'", $field, $value);
+            }
+
+            $url .= sprintf(
+                '?filterByFormula=(%s)',
+                implode(' AND ', $formulas)
+            );
+        }
+
+        $offset = null;
+        $start = true;
+        $res = [];
+        while ($start || $offset != null) {
+            $start = false;
+            $newUrl = $url;
+            if (!empty($offset)) {
+                if (count($criteria) > 0) {
+                    $newUrl .= '&';
+                } else {
+                    $newUrl .= '?';
+                }
+                $newUrl .= '&offset=' . $offset;
+            }
+
+
+            /** @var Response $response */
+            $response = $this->browser->get(
+                $newUrl,
+                [
+                    'content-type' => 'application/json',
+                ]
+            );
+            $data = json_decode($response->getContent(), true);
+
+            if(empty($data['records'])){
+                return [];
+            }
+            $offset = $data['offset'] ?? null;
+
+            $result = array_map(function (array $value) {
+                return new Record($value['id'], $value['fields']);
+            }, $data['records']);
+
+            $res = array_merge($res, $result);
+        }
+
+        return $res;
+    }
+
+    protected function getEndpoint(string $table, ?string $id = null): string
+    {
+        if ($id) {
+            $urlPattern = 'https://api.airtable.com/v0/%BASE%/%TABLE%/%ID%';
+
+            return strtr($urlPattern, [
+                '%BASE%' => $this->base,
+                '%TABLE%' => rawurlencode($table),
+                '%ID%' => $id,
+            ]);
+        }
+
+        $urlPattern = 'https://api.airtable.com/v0/%BASE%/%TABLE%';
+
+        return strtr($urlPattern, [
+            '%BASE%' => $this->base,
+            '%TABLE%' => rawurlencode($table),
+        ]);
+    }
+
+    protected function guardResponse(string $table, Response $response): array
+    {
+        if (429 === $response->getStatusCode()) {
+            throw new \RuntimeException(sprintf('Rate limit reach on "%s:%s".', $this->base, $table));
+        }
+
+        if (200 !== $response->getStatusCode()) {
+            $content = json_decode($response->getContent(), true);
+            $message = $content['error']['message'] ?? 'No details';
+
+            throw new \RuntimeException(sprintf('An "%s" error occurred when trying to create record on "%s:%s" : %s', $response->getStatusCode(), $this->base, $table, $message));
+        }
+
+
+        if (empty($response->getContent())) {
+
+            return [];
+        }
+
+        $content = json_decode($response->getContent(), true);
+
+        return $content;
+    }
+
+    public function getBase()
+    {
+        $urlPattern = 'https://api.airtable.com/v0/meta/bases/%BASE%?include=collaborators&include=inviteLinks';
+
+        $url = strtr($urlPattern, [
+            '%BASE%' => $this->base,
+        ]);
+
+        /** @var Response $response */
+        $response = $this->browser->get(
+            $url,
+            [
+                'content-type' => 'application/json',
+            ]
+        );
+
+        $data = json_decode($response->getContent(), true);
+
+        return $data;
+    }
+
+     /**
      * Search Records 
      *
      * @param string $table
@@ -315,122 +442,5 @@ class Airtable
         }
 
         return $res;
-    }
-
-    /**
-     * TODO - Be able to loop over multiple pages.
-     *
-     * @return Record[]
-     */
-    public function findRecords(string $table, array $criteria = []): array
-    {
-        $url = $this->getEndpoint($table);
-
-        if (count($criteria) > 0) {
-            $formulas = [];
-            foreach ($criteria as $field => $value) {
-                $field = $this->format($field);
-                $formulas[] = sprintf("{%s}='%s'", $field, $value);
-            }
-
-            $url .= sprintf(
-                '?filterByFormula=(%s)',
-                implode(' AND ', $formulas)
-            );
-        }
-
-        $offset = null;
-        $start = true;
-        $res = [];
-        while ($start || $offset != null) {
-            $start = false;
-            $newUrl = $url;
-            if (!empty($offset)) {
-                if (count($criteria) > 0) {
-                    $newUrl .= '&';
-                } else {
-                    $newUrl .= '?';
-                }
-                $newUrl .= '&offset=' . $offset;
-            }
-
-
-            /** @var Response $response */
-            $response = $this->browser->get(
-                $newUrl,
-                [
-                    'content-type' => 'application/json',
-                ]
-            );
-            $data = json_decode($response->getContent(), true);
-
-            if (empty($data['records'])) {
-                return [];
-            }
-            $offset = $data['offset'] ?? null;
-
-            $result = array_map(function (array $value) {
-                return new Record($value['id'], $value['fields']);
-            }, $data['records']);
-
-            $res = array_merge($res, $result);
-        }
-
-        return $res;
-    }
-
-    protected function getEndpoint(string $table, ?string $id = null): string
-    {
-        if ($id) {
-            $urlPattern = 'https://api.airtable.com/v0/%BASE%/%TABLE%/%ID%';
-
-            return strtr($urlPattern, [
-                '%BASE%' => $this->base,
-                '%TABLE%' => rawurlencode($table),
-                '%ID%' => $id,
-            ]);
-        }
-
-        $urlPattern = 'https://api.airtable.com/v0/%BASE%/%TABLE%';
-
-        return strtr($urlPattern, [
-            '%BASE%' => $this->base,
-            '%TABLE%' => rawurlencode($table),
-        ]);
-    }
-
-    protected function guardResponse(string $table, Response $response): void
-    {
-        if (429 === $response->getStatusCode()) {
-            throw new \RuntimeException(sprintf('Rate limit reach on "%s:%s".', $this->base, $table));
-        }
-
-        if (200 !== $response->getStatusCode()) {
-            $content = json_decode($response->getContent(), true);
-            $message = $content['error']['message'] ?? 'No details';
-
-            throw new \RuntimeException(sprintf('An "%s" error occurred when trying to create record on "%s:%s" : %s', $response->getStatusCode(), $this->base, $table, $message));
-        }
-    }
-
-    public function getBase()
-    {
-        $urlPattern = 'https://api.airtable.com/v0/meta/bases/%BASE%?include=collaborators&include=inviteLinks';
-
-        $url = strtr($urlPattern, [
-            '%BASE%' => $this->base,
-        ]);
-
-        /** @var Response $response */
-        $response = $this->browser->get(
-            $url,
-            [
-                'content-type' => 'application/json',
-            ]
-        );
-
-        $data = json_decode($response->getContent(), true);
-
-        return $data;
     }
 }
