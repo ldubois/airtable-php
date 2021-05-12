@@ -59,8 +59,8 @@ class TableManipulator
         return $this->client->findRecord($this->table, $criteria);
     }
 
-    public function findRecords(array $criteria = []): array
+    public function findRecords(array $criteria = [],string $view = null): array
     {
-        return $this->client->findRecords($this->table, $criteria);
+        return $this->client->findRecords($this->table, $criteria,$view);
     }
 }

@@ -239,9 +239,11 @@ class Airtable
      *
      * @return Record[]
      */
-    public function findRecords(string $table, array $criteria = []): array
+    public function findRecords(string $table, array $criteria = [],string $view = ""): array
     {
         $url = $this->getEndpoint($table);
+
+        $sep = "?";
 
         if (count($criteria) > 0) {
             $formulas = [];
@@ -251,9 +253,19 @@ class Airtable
             }
 
             $url .= sprintf(
-                '?filterByFormula=(%s)',
+                $sep.'filterByFormula=(%s)',
                 implode(' AND ', $formulas)
             );
+            $sep="&";
+        }
+
+        if (!empty($view)) {
+            $url .= sprintf(
+                $sep.'view=%s',
+                rawurlencode($view)
+            );
+            
+            $sep="&";
         }
 
         $offset = null;
@@ -263,12 +275,8 @@ class Airtable
             $start = false;
             $newUrl = $url;
             if (!empty($offset)) {
-                if (count($criteria) > 0) {
-                    $newUrl .= '&';
-                } else {
-                    $newUrl .= '?';
-                }
-                $newUrl .= '&offset=' . $offset;
+                
+                $newUrl .= $sep.'offset=' . $offset;
             }
 
 
