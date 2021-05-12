@@ -371,7 +371,7 @@ class Airtable
      * @param integer $maxRows
      * @return Record[]
      */
-    public function searchRecords(string $table, array $fields, string $search, string $criteria = "", string $view = "", int $maxRows = 5)
+    public function searchRecords(string $table, array $fields, string $search, string $criteria = "", string $view = "", int $maxRows = 5, bool $strictMode = false)
     {
         $url = $this->getEndpoint($table);
         $url .= sprintf(
@@ -392,7 +392,12 @@ class Airtable
             $formulas = [];
 
             foreach ($fields as $field) {
-                $formulas[] = sprintf("FIND(\"%s\",{%s})>0", $search, $field);
+                if($strictMode){
+                    $formulas[] = sprintf("FIND(\"%s\",{%s})>0", $search, $field);
+                }
+                else{
+                    $formulas[] = sprintf("FIND(LOWER(\"%s\"),LOWER({%s}))>0", $search, $field);
+                }
             }
 
             $searchString .= 'OR(' . rawurlencode(implode(',', $formulas)) . ')';
