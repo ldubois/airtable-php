@@ -235,7 +235,7 @@ class Airtable
     }
 
     /**
-     * TODO - Be able to loop over multiple pages.
+     * retrieve all records by criteria equals
      *
      * @return Record[]
      */
@@ -255,6 +255,71 @@ class Airtable
             $url .= sprintf(
                 $sep.'filterByFormula=(%s)',
                 implode(' AND ', $formulas)
+            );
+            $sep="&";
+        }
+
+        if (!empty($view)) {
+            $url .= sprintf(
+                $sep.'view=%s',
+                rawurlencode($view)
+            );
+            
+            $sep="&";
+        }
+
+        $offset = null;
+        $start = true;
+        $res = [];
+        while ($start || $offset != null) {
+            $start = false;
+            $newUrl = $url;
+            if (!empty($offset)) {
+                
+                $newUrl .= $sep.'offset=' . $offset;
+            }
+
+
+            /** @var Response $response */
+            $response = $this->browser->get(
+                $newUrl,
+                [
+                    'content-type' => 'application/json',
+                ]
+            );
+            $data = json_decode($response->getContent(), true);
+
+            if(empty($data['records'])){
+                return [];
+            }
+            $offset = $data['offset'] ?? null;
+
+            $result = array_map(function (array $value) {
+                return new Record($value['id'], $value['fields']);
+            }, $data['records']);
+
+            $res = array_merge($res, $result);
+        }
+
+        return $res;
+    }
+
+    /**
+     * retrieve all records by criteria equals
+     *
+     * @return Record[]
+     */
+    public function findRecordsByFormula(string $table, string $formula,string $view = ""): array
+    {
+        $url = $this->getEndpoint($table);
+
+        $sep = "?";
+
+        if (!empty($formula)) {
+            
+            $url .= sprintf(
+                $sep.'filterByFormula=(%s)',
+               $formula
             );
             $sep="&";
         }

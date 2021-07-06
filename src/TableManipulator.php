@@ -63,4 +63,10 @@ class TableManipulator
     {
         return $this->client->findRecords($this->table, $criteria,$view);
     }
+
+    
+    public function findRecordsByFormula(string $formula,string $view = ""): array
+    {
+        return $this->client->findRecordsByFormula($this->table, $formula,$view);
+    }
 }
