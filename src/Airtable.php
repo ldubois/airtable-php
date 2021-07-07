@@ -319,7 +319,7 @@ class Airtable
             
             $url .= sprintf(
                 $sep.'filterByFormula=(%s)',
-               $formula
+                rawurlencode($formula)
             );
             $sep="&";
         }
