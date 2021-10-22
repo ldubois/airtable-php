@@ -239,7 +239,7 @@ class Airtable
      *
      * @return Record[]
      */
-    public function findRecords(string $table, array $criteria = [],string $view = ""): array
+    public function findRecords(string $table, array $criteria = [], string $view = ""): array
     {
         $url = $this->getEndpoint($table);
 
@@ -249,7 +249,7 @@ class Airtable
             $formulas = [];
             foreach ($criteria as $field => $value) {
                 $field = $this->format($field);
-                $formulas[] = sprintf("{%s}='%s'", $field, $value);
+                $formulas[] = sprintf("{%s}='%s'", rawurlencode($field), $value);
             }
 
             $url .= sprintf(
@@ -275,7 +275,6 @@ class Airtable
             $start = false;
             $newUrl = $url;
             if (!empty($offset)) {
-                
                 $newUrl .= $sep.'offset=' . $offset;
             }
 
@@ -289,7 +288,7 @@ class Airtable
             );
             $data = json_decode($response->getContent(), true);
 
-            if(empty($data['records'])){
+            if (empty($data['records'])) {
                 return [];
             }
             $offset = $data['offset'] ?? null;
@@ -309,14 +308,13 @@ class Airtable
      *
      * @return Record[]
      */
-    public function findRecordsByFormula(string $table, string $formula,string $view = ""): array
+    public function findRecordsByFormula(string $table, string $formula, string $view = ""): array
     {
         $url = $this->getEndpoint($table);
 
         $sep = "?";
 
         if (!empty($formula)) {
-            
             $url .= sprintf(
                 $sep.'filterByFormula=(%s)',
                 rawurlencode($formula)
@@ -340,7 +338,6 @@ class Airtable
             $start = false;
             $newUrl = $url;
             if (!empty($offset)) {
-                
                 $newUrl .= $sep.'offset=' . $offset;
             }
 
@@ -354,7 +351,7 @@ class Airtable
             );
             $data = json_decode($response->getContent(), true);
 
-            if(empty($data['records'])){
+            if (empty($data['records'])) {
                 return [];
             }
             $offset = $data['offset'] ?? null;
@@ -404,7 +401,6 @@ class Airtable
 
 
         if (empty($response->getContent())) {
-
             return [];
         }
 
@@ -434,16 +430,16 @@ class Airtable
         return $data;
     }
 
-     /**
-     * Search Records 
-     *
-     * @param string $table
-     * @param array $fields
-     * @param string $search
-     * @param string $criteria
-     * @param integer $maxRows
-     * @return Record[]
-     */
+    /**
+    * Search Records
+    *
+    * @param string $table
+    * @param array $fields
+    * @param string $search
+    * @param string $criteria
+    * @param integer $maxRows
+    * @return Record[]
+    */
     public function searchRecords(string $table, array $fields, string $search, string $criteria = "", string $view = "", int $maxRows = 5, bool $strictMode = false)
     {
         $url = $this->getEndpoint($table);
@@ -465,21 +461,18 @@ class Airtable
             $formulas = [];
 
             foreach ($fields as $field) {
-                if($strictMode){
+                if ($strictMode) {
                     $formulas[] = sprintf("FIND(\"%s\",{%s})>0", $search, $field);
-                }
-                else{
+                } else {
                     $formulas[] = sprintf("FIND(LOWER(\"%s\"),LOWER({%s}))>0", $search, $field);
                 }
             }
 
             $searchString .= 'OR(' . rawurlencode(implode(',', $formulas)) . ')';
             //$url .= '&filterByFormula='.rawurlencode($formulas[0]).'';
-
         }
 
         if (!empty($criteria)) {
-
             $url .= '&filterByFormula=AND(' . rawurlencode($criteria) . ',' . $searchString . ')';
         } else {
             $url .= '&filterByFormula=' . $searchString;
