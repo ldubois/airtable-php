@@ -229,7 +229,7 @@ class Airtable
             return $res;
         }
 
-        $s = str_replace(' ', '%20', $s);
+        $s = rawurlencode($s);
 
         return $s;
     }
@@ -249,7 +249,7 @@ class Airtable
             $formulas = [];
             foreach ($criteria as $field => $value) {
                 $field = $this->format($field);
-                $formulas[] = sprintf("{%s}='%s'", rawurlencode($field), $value);
+                $formulas[] = sprintf("{%s}='%s'", $field, $value);
             }
 
             $url .= sprintf(
