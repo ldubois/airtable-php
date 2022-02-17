@@ -7,7 +7,6 @@ use Buzz;
 use Buzz\Browser;
 use Buzz\Client\AbstractClient;
 use Buzz\Client\Curl;
-use Buzz\Message\Response;
 use Buzz\Middleware\CallbackMiddleware;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\RequestInterface;
@@ -184,7 +183,6 @@ class Airtable
     {
         $url = $this->getEndpoint($table, $id);
 
-        /** @var Response $response */
         $response = $this->browser->get(
             $url,
             [
@@ -192,7 +190,7 @@ class Airtable
             ]
         );
 
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
 
         if (empty($data['id']) || empty($data['fields'])) {
             throw new \RuntimeException(sprintf("No records have been found from '%s:%s:%s'.", $this->base, $table, $id));
@@ -277,14 +275,13 @@ class Airtable
             }
 
 
-            /** @var Response $response */
             $response = $this->browser->get(
                 $newUrl,
                 [
                     'content-type' => 'application/json',
                 ]
             );
-            $data = json_decode($response->getContent(), true);
+            $data = json_decode($response->getBody(), true);
 
             if (empty($data['records'])) {
                 return [];
@@ -340,14 +337,13 @@ class Airtable
             }
 
 
-            /** @var Response $response */
             $response = $this->browser->get(
                 $newUrl,
                 [
                     'content-type' => 'application/json',
                 ]
             );
-            $data = json_decode($response->getContent(), true);
+            $data = json_decode($response->getBody(), true);
 
             if (empty($data['records'])) {
                 return [];
@@ -415,7 +411,7 @@ class Airtable
             '%BASE%' => $this->base,
         ]);
 
-        /** @var Response $response */
+
         $response = $this->browser->get(
             $url,
             [
@@ -423,7 +419,7 @@ class Airtable
             ]
         );
 
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
 
         return $data;
     }
@@ -490,14 +486,14 @@ class Airtable
             }
 
 
-            /** @var Response $response */
+
             $response = $this->browser->get(
                 $newUrl,
                 [
                     'content-type' => 'application/json',
                 ]
             );
-            $data = json_decode($response->getContent(), true);
+            $data = json_decode($response->getBody(), true);
             if (empty($data['records'])) {
                 return [];
             }
