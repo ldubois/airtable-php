@@ -31,7 +31,7 @@ class Airtable
         $this->browser = new Buzz\Browser(new Buzz\Client\Curl());
         $this->browser->addListener($listener);
 
-        
+
         /** @var AbstractClient */
         $client = $this->browser->getClient();
         $client->setTimeout($timeout);
@@ -44,20 +44,27 @@ class Airtable
         return new TableManipulator($this, $table);
     }
 
-    public function createRecord(string $table, array $fields): array
+    public function createRecord(string $table, array $fields, bool $typecast = false): array
     {
+       
         /** @var Response $response */
         $response = $this->browser->post(
             $this->getEndpoint($table),
             [
                 'content-type' => 'application/json',
             ],
-            json_encode([
-                'fields' => $fields,
-            ])
+            json_encode(
+                [
+                    "records" => [
+                        ['fields' => $fields,]
+                    ],
+                    "typecast" => $typecast
+                ]
+            )
         );
 
-        return $this->guardResponse($table, $response);
+        $records = $this->guardResponse($table, $response);
+        return $records['records'][0];
     }
 
     /**
@@ -77,9 +84,11 @@ class Airtable
             [
                 'content-type' => 'application/json',
             ],
-            json_encode([
-                'fields' => $fields,
-            ])
+            json_encode(
+                [
+                    'fields' => $fields,
+                ]
+            )
         );
 
         return $this->guardResponse($table, $response);
@@ -116,9 +125,11 @@ class Airtable
             [
                 'content-type' => 'application/json',
             ],
-            json_encode([
-                'fields' => $fields,
-            ])
+            json_encode(
+                [
+                    'fields' => $fields,
+                ]
+            )
         );
 
         return $this->guardResponse($table, $response);
@@ -174,8 +185,8 @@ class Airtable
             $response = $this->browser->delete(
                 $this->getEndpoint($table, $record->getId()),
                 [
-                'content-type' => 'application/json',
-            ]
+                    'content-type' => 'application/json',
+                ]
             );
 
             $this->guardResponse($table, $response);
@@ -253,19 +264,19 @@ class Airtable
             }
 
             $url .= sprintf(
-                $sep.'filterByFormula=(%s)',
+                $sep . 'filterByFormula=(%s)',
                 implode(' AND ', $formulas)
             );
-            $sep="&";
+            $sep = "&";
         }
 
         if (!empty($view)) {
             $url .= sprintf(
-                $sep.'view=%s',
+                $sep . 'view=%s',
                 rawurlencode($view)
             );
-            
-            $sep="&";
+
+            $sep = "&";
         }
 
         $offset = null;
@@ -275,7 +286,7 @@ class Airtable
             $start = false;
             $newUrl = $url;
             if (!empty($offset)) {
-                $newUrl .= $sep.'offset=' . $offset;
+                $newUrl .= $sep . 'offset=' . $offset;
             }
 
 
@@ -316,19 +327,19 @@ class Airtable
 
         if (!empty($formula)) {
             $url .= sprintf(
-                $sep.'filterByFormula=(%s)',
+                $sep . 'filterByFormula=(%s)',
                 rawurlencode($formula)
             );
-            $sep="&";
+            $sep = "&";
         }
 
         if (!empty($view)) {
             $url .= sprintf(
-                $sep.'view=%s',
+                $sep . 'view=%s',
                 rawurlencode($view)
             );
-            
-            $sep="&";
+
+            $sep = "&";
         }
 
         $offset = null;
@@ -338,7 +349,7 @@ class Airtable
             $start = false;
             $newUrl = $url;
             if (!empty($offset)) {
-                $newUrl .= $sep.'offset=' . $offset;
+                $newUrl .= $sep . 'offset=' . $offset;
             }
 
 
@@ -431,15 +442,15 @@ class Airtable
     }
 
     /**
-    * Search Records
-    *
-    * @param string $table
-    * @param array $fields
-    * @param string $search
-    * @param string $criteria
-    * @param integer $maxRows
-    * @return Record[]
-    */
+     * Search Records
+     *
+     * @param string $table
+     * @param array $fields
+     * @param string $search
+     * @param string $criteria
+     * @param integer $maxRows
+     * @return Record[]
+     */
     public function searchRecords(string $table, array $fields, string $search, string $criteria = "", string $view = "", int $maxRows = 5, bool $strictMode = false)
     {
         $url = $this->getEndpoint($table);

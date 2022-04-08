@@ -14,9 +14,9 @@ class TableManipulator
     }
 
 
-    public function createRecord(array $fields): array
+    public function createRecord(array $fields, bool $typecast = false): array
     {
-        return $this->client->createRecord($this->table, $fields);
+        return $this->client->createRecord($this->table, $fields, $typecast);
     }
 
     public function setRecord(array $criteria, array $fields): array
@@ -29,7 +29,7 @@ class TableManipulator
         return $this->client->updateRecord($this->table, $criteria, $fields);
     }
 
-    public function updateRecordById(string $id,array $fields): array
+    public function updateRecordById(string $id, array $fields): array
     {
         return $this->client->updateRecordById($this->table, $id, $fields);
     }
@@ -59,14 +59,14 @@ class TableManipulator
         return $this->client->findRecord($this->table, $criteria);
     }
 
-    public function findRecords(array $criteria = [],string $view = ""): array
+    public function findRecords(array $criteria = [], string $view = ""): array
     {
-        return $this->client->findRecords($this->table, $criteria,$view);
+        return $this->client->findRecords($this->table, $criteria, $view);
     }
 
     
-    public function findRecordsByFormula(string $formula,string $view = ""): array
+    public function findRecordsByFormula(string $formula, string $view = ""): array
     {
-        return $this->client->findRecordsByFormula($this->table, $formula,$view);
+        return $this->client->findRecordsByFormula($this->table, $formula, $view);
     }
 }
