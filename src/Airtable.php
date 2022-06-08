@@ -67,6 +67,31 @@ class Airtable
         return $records['records'][0];
     }
 
+    
+    public function createRecords(string $table, array $records, bool $typecast = false): array
+    {
+
+       
+        /** @var Response $response */
+        $response = $this->browser->post(
+            $this->getEndpoint($table),
+            [
+                'content-type' => 'application/json',
+            ],
+            json_encode(
+                [
+                    "records" => 
+                        $records
+                    ,
+                ]
+            )
+        );
+
+        $records = $this->guardResponse($table, $response);
+        return $records['records'];
+    }
+
+
     /**
      * This will update all fields of a table record, issuing a PUT request to the record endpoint. Any fields that are not included will be cleared ().
      *

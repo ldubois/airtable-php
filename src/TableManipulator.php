@@ -18,6 +18,11 @@ class TableManipulator
     {
         return $this->client->createRecord($this->table, $fields, $typecast);
     }
+    
+    public function createRecords(array $records, bool $typecast = false): array
+    {
+        return $this->client->createRecords($this->table, $records, $typecast);
+    }
 
     public function setRecord(array $criteria, array $fields): array
     {
