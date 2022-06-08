@@ -46,7 +46,7 @@ class Airtable
 
     public function createRecord(string $table, array $fields, bool $typecast = false): array
     {
-       
+
         /** @var Response $response */
         $response = $this->browser->post(
             $this->getEndpoint($table),
@@ -67,11 +67,11 @@ class Airtable
         return $records['records'][0];
     }
 
-    
+
     public function createRecords(string $table, array $records, bool $typecast = false): array
     {
 
-       
+
         /** @var Response $response */
         $response = $this->browser->post(
             $this->getEndpoint($table),
@@ -80,9 +80,9 @@ class Airtable
             ],
             json_encode(
                 [
-                    "records" => 
-                        $records
-                    ,
+                    "records" =>
+                    $records,
+                    "typecast" => $typecast
                 ]
             )
         );
