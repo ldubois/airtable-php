@@ -70,8 +70,8 @@ class TableManipulator
     }
 
     
-    public function findRecordsByFormula(string $formula, string $view = "", string $order = ""): array
+    public function findRecordsByFormula(string $formula, string $view = "", array $orders = []): array
     {
-        return $this->client->findRecordsByFormula($this->table, $formula, $view, $order);
+        return $this->client->findRecordsByFormula($this->table, $formula, $view, $orders);
     }
 }

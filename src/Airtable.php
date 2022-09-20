@@ -339,12 +339,12 @@ class Airtable
         return $res;
     }
 
-    /**
+   /**
      * retrieve all records by criteria equals
      *
      * @return Record[]
      */
-    public function findRecordsByFormula(string $table, string $formula, string $view = "",string $order = ""): array
+    public function findRecordsByFormula(string $table, string $formula, string $view = "",array $orders = []): array
     {
         $url = $this->getEndpoint($table);
 
@@ -367,14 +367,24 @@ class Airtable
             $sep = "&";
         }
 
-        if (!empty($order)) {
-            $url .= sprintf(
-                $sep . '%s',
-                rawurlencode($order)
-            );
+        foreach($orders as $key=>$order){
+            
 
-            $sep = "&";
+                $url .= sprintf(
+                    $sep . '%s',
+                    rawurlencode("sort[".$key."][field]").'='.$order['field']
+                );
+    
+                $sep = "&";
+
+                $url .= sprintf(
+                    $sep . '%s',
+                    rawurlencode("sort[".$key."][direction]")."=".$order['direction']
+                );
+            
         }
+        
+
 
         $offset = null;
         $start = true;
