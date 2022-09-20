@@ -344,7 +344,7 @@ class Airtable
      *
      * @return Record[]
      */
-    public function findRecordsByFormula(string $table, string $formula, string $view = ""): array
+    public function findRecordsByFormula(string $table, string $formula, string $view = "",string $order = ""): array
     {
         $url = $this->getEndpoint($table);
 
@@ -362,6 +362,15 @@ class Airtable
             $url .= sprintf(
                 $sep . 'view=%s',
                 rawurlencode($view)
+            );
+
+            $sep = "&";
+        }
+
+        if (!empty($order)) {
+            $url .= sprintf(
+                $sep . '%s',
+                rawurlencode($order)
             );
 
             $sep = "&";
